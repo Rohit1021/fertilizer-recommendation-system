@@ -36,7 +36,6 @@ Each row represents a field condition with the recommended fertilizer:
   - Displays **Top-3 fertilizer predictions** directly in the browser.
 - **Deployment Ready**
   - Schema-driven inference pipeline ensures consistency between training and prediction.
-  - Simple to deploy on Render / Railway / HuggingFace Spaces.
 
 ---
 
