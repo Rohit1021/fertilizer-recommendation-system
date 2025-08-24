@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fertilizer Recommendation (XGBoost)</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 920px; margin: 24px auto; }
+    h2 { margin-top: 0; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px,1fr)); gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    label { font-weight: 600; display:block; margin-bottom: 6px; }
+    input, select { width: 100%; padding: 8px; }
+    .btn { padding: 10px 16px; font-weight: 600; margin-top: 12px; }
+    .result { margin-top: 22px; }
+    .best { background: #eefaf0; padding: 12px; border-radius: 8px; }
+    .muted { color: #666; font-size: 0.92em; }
+    ol { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Fertilizer Recommendation (Top-3 + Best)</h2>
+  <p class="muted">
+    Choose categorical values from training categories. Enter numeric values freely (e.g., 42.5).
+  </p>
+
+  <form method="post" novalidate>
+    <div class="grid">
+      {% for c in cat_cols %}
+      <div class="card">
+        <label>{{ c }}</label>
+        {% set opts = cat_options.get(c, []) %}
+        <select name="{{ c }}">
+          {% for opt in opts %}
+            <option value="{{ opt }}" {% if inputs and inputs.get(c)==opt %}selected{% endif %}>
+              {{ opt }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+
+      {% for n in num_cols %}
+      <div class="card">
+        <label>{{ n }}</label>
+        <!-- plain text; server parses to float and uses training median when left blank -->
+        <input
+          type="text"
+          inputmode="decimal"
+          name="{{ n }}"
+          placeholder="Enter {{ n }} (e.g., 42.5)"
+          value="{{ inputs.get(n,'') if inputs else '' }}"
+        >
+      </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn">Predict</button>
+  </form>
+
+  {% if top3 %}
+  <div class="result">
+    <h3>Top-3 Predictions</h3>
+    <ol>
+      {% for label, score in top3 %}
+        <li>{{ label }}</li>
+      {% endfor %}
+    </ol>
+  </div>
+{% endif %}
+
+</body>
+</html>
