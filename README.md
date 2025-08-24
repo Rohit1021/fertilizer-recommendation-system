@@ -1,17 +1,17 @@
-# Fertilizer Recommendation System(Kaggle Playground Series) 🌱
+# Fertilizer Recommendation System(Kaggle Playground Series)
 
 A machine learning–powered web application that predicts the **Top-3 recommended fertilizers** for given soil, crop, and environmental conditions.  
 Built using the **Fertilizer Recommendation Dataset** and extended with a **Flask web app** for interactive predictions.
 
 ---
 
-## 📌 Problem Statement
+## Problem Statement
 Farmers need guidance on which fertilizer to use based on crop type, soil conditions, and environmental parameters.  
 The objective is to build a model that learns from past labeled data and recommends the **most suitable fertilizers**, evaluated using **Mean Average Precision @ 3 (MAP@3)**.
 
 ---
 
-## 📊 Dataset
+## Dataset
 Each row represents a field condition with the recommended fertilizer:
 
 | id | Temperature | Humidity | Moisture | Soil Type | Crop Type | Nitrogen | Potassium | Phosphorous | Fertilizer Name |
@@ -23,7 +23,7 @@ Each row represents a field condition with the recommended fertilizer:
 
 ---
 
-## ⚙️ Features
+## Features
 - **Data Preprocessing**
   - Label encoding for categorical features.
   - Missing numerics imputed with **training medians**.
@@ -40,7 +40,6 @@ Each row represents a field condition with the recommended fertilizer:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Python 3.8+**
 - **Libraries:** XGBoost, scikit-learn, pandas, numpy, Flask
-- **Frontend:** HTML5/CSS with Jinja2 templates
