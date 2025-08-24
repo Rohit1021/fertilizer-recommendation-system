@@ -1,7 +1,7 @@
-# Fertilizer Recommendation System(Kaggle Playground Series)
+# Fertilizer Prediction System(Kaggle Playground Series)
 
 A machine learning–powered web application that predicts the **Top-3 recommended fertilizers** for given soil, crop, and environmental conditions.  
-Built using the **Fertilizer Recommendation Dataset(Kaggle Playground Series)** and extended with a **Flask web app** for interactive predictions.
+Built using the **Fertilizer Prediction Dataset(Kaggle Playground Series)** and extended with a **Flask web app** for interactive predictions.
 
 ---
 
@@ -33,7 +33,7 @@ Each row represents a field condition with the recommended fertilizer:
   - Predictions return **Top-3 fertilizers** with associated probabilities.
 - **Web Application**
   - Flask backend with dropdowns for categorical inputs and text boxes for numeric features.
-  - Displays **Top-3 fertilizer recommendations** directly in the browser.
+  - Displays **Top-3 fertilizer predictions** directly in the browser.
 - **Deployment Ready**
   - Schema-driven inference pipeline ensures consistency between training and prediction.
   - Simple to deploy on Render / Railway / HuggingFace Spaces.
