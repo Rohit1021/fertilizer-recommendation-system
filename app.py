@@ -3,18 +3,15 @@ import numpy as np
 import pandas as pd
 import pickle, json, os, sys
 
-# ------------------------------
-# Load schema (required)
-# ------------------------------
 with open("schema.json", "r") as f:
     SCHEMA = json.load(f)
 
 FEATURE_COLS   = SCHEMA.get("feature_cols", [])
 CAT_COLS       = SCHEMA.get("categorical_cols", [])
 NUM_COLS       = SCHEMA.get("numeric_cols", [])
-CAT_OPTIONS    = SCHEMA.get("categorical_options", {})   # {col: [opt1, opt2, ...]}
-NUM_MEDIANS    = SCHEMA.get("numeric_medians", {})       # {num_col: median}
-TARGET_CLASSES = SCHEMA.get("target_classes")            # list of class names in encoder order
+CAT_OPTIONS    = SCHEMA.get("categorical_options", {})
+NUM_MEDIANS    = SCHEMA.get("numeric_medians", {})
+TARGET_CLASSES = SCHEMA.get("target_classes")
 
 print("[APP] feature_cols:", len(FEATURE_COLS), "example:", FEATURE_COLS[:6])
 print("[APP] categorical_cols:", CAT_COLS)
@@ -23,9 +20,6 @@ print("[APP] categorical_options keys:", list(CAT_OPTIONS.keys())[:10])
 print("[APP] numeric_medians keys:", list(NUM_MEDIANS.keys())[:10])
 print("[APP] has target_classes:", bool(TARGET_CLASSES))
 
-# ------------------------------
-# Optional: rebuild options/classes if schema missed them
-# ------------------------------
 if (not CAT_OPTIONS) and os.path.exists("label_encoders.pkl"):
     try:
         with open("label_encoders.pkl", "rb") as f:
@@ -46,14 +40,8 @@ if TARGET_CLASSES is None and os.path.exists("target_encoder.pkl"):
     except Exception as e:
         print("[APP] Warning: could not load target_encoder.pkl:", e, file=sys.stderr)
 
-# ------------------------------
-# Build category->index maps
-# ------------------------------
 ENC_MAPS = {c: {v: i for i, v in enumerate(CAT_OPTIONS.get(c, []))} for c in CAT_COLS}
 
-# ------------------------------
-# Load model (required)
-# ------------------------------
 with open("fertilizer_model.pkl", "rb") as f:
     MODEL = pickle.load(f)
 
@@ -61,41 +49,27 @@ print("[APP] model classes_:", getattr(MODEL, "classes_", None))
 
 app = Flask(__name__)
 
-# ------------------------------
-# Helpers
-# ------------------------------
 def parse_float(value):
     """Friendly float parser that accepts commas/blanks."""
     s = str(value).strip().replace(",", ".")
     try:
         return float(s)
     except Exception:
-        return None  # return None so we can decide to use median
+        return None
 
 def preprocess_form(form):
-    """
-    Create a single-row DataFrame in FEATURE_COLS order.
-    - Categorical: pick exact option string; if missing, use first option (index 0).
-      (We deliberately lock UI to dropdowns to avoid unseen text during validation.)
-    - Numeric: parse; use training median if blank/invalid; else value.
-    - Enforce dtypes before prediction.
-    """
     row = {}
 
-    # Categorical (dropdowns only; values come from CAT_OPTIONS)
     for c in CAT_COLS:
         selected = form.get(c, "")
         opts = CAT_OPTIONS.get(c, [])
         if not opts:
-            # no known options, default 0
             row[c] = 0
         else:
             if selected not in ENC_MAPS[c]:
-                # if somehow a different string arrives, fallback to first option
                 selected = opts[0]
             row[c] = ENC_MAPS[c][selected]
 
-    # Numeric
     for n in NUM_COLS:
         raw = form.get(n, "")
         val = parse_float(raw)
@@ -103,7 +77,6 @@ def preprocess_form(form):
             val = float(NUM_MEDIANS.get(n, 0.0))
         row[n] = val
 
-    # Assemble and enforce dtypes
     Xrow = pd.DataFrame([[row.get(col, np.nan) for col in FEATURE_COLS]], columns=FEATURE_COLS)
 
     for c in CAT_COLS:
@@ -114,13 +87,8 @@ def preprocess_form(form):
     return Xrow
 
 def top3_from_proba(proba_1d):
-    """
-    Correctly map proba positions -> MODEL.classes_ -> human label via TARGET_CLASSES.
-    This avoids label shifts that make everything look wrong.
-    """
     pos = np.argsort(proba_1d)[::-1][:3]
 
-    # class ids in the same order as predict_proba columns
     if hasattr(MODEL, "classes_"):
         class_ids = MODEL.classes_
     else:
@@ -137,9 +105,6 @@ def top3_from_proba(proba_1d):
         scores.append(float(proba_1d[p]))
     return list(zip(labels, scores))
 
-# ------------------------------
-# Routes
-# ------------------------------
 @app.route("/", methods=["GET", "POST"])
 def index():
     top3 = None
@@ -166,5 +131,4 @@ def index():
     )
 
 if __name__ == "__main__":
-    # set host="0.0.0.0" if you want LAN access
     app.run(debug=True)
